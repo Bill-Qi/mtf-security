@@ -9,14 +9,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.mtf.security.core.properties.SecurityProperties;
+import com.mtf.security.core.validate.code.ValidateCodeFilter;
 
-/** 
-* @author Bill
-* @date 2019年11月28日
-*
-*/
+/**
+ * @author Bill
+ * @date 2019年11月28日
+ *
+ */
 @Configuration
 public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -24,35 +26,36 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Autowired
 	private SecurityProperties securityProperties;
-	
+
 	@Autowired
 	private AuthenticationSuccessHandler mtfAuthenticationSuccessHandler;
-	
+
 	@Autowired
 	private AuthenticationFailureHandler mtfAuthenticationFailureHandler;
-	
-	
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		
-		http.formLogin()
-			.loginPage("/authentication/require")
-			.loginProcessingUrl("/authentication/form")
-			.successHandler(mtfAuthenticationSuccessHandler)
-			.failureHandler(mtfAuthenticationFailureHandler)
+
+		// 验证码过滤器
+		ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
+		// 验证码过滤器中使用自己的错误处理
+		validateCodeFilter.setAuthenticationFailureHandler(mtfAuthenticationFailureHandler);
+
+		http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)//把验证码过滤器加载登录过滤器前边
+				.formLogin().loginPage("/authentication/require").loginProcessingUrl("/authentication/form")
+				.successHandler(mtfAuthenticationSuccessHandler).failureHandler(mtfAuthenticationFailureHandler)
 //		http.httpBasic()
-			.and()
-			.authorizeRequests()
-			.antMatchers("/authentication/require",
-					securityProperties.getBrowser().getLoginPage()).permitAll()
-			.anyRequest()
-			.authenticated()
-			.and()
-			.csrf().disable();
-		
+				.and().authorizeRequests()
+				.antMatchers("/authentication/require"
+						, securityProperties.getBrowser().getLoginPage()
+						,"/code/image"
+						).permitAll()
+				.anyRequest().authenticated()
+				.and().csrf().disable();
+
 	}
-	
+
 }
