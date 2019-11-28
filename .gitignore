@@ -1,4 +1,7 @@
 
+### eclipse ###
+*.prefs
+
 # Created by https://www.gitignore.io/api/java,linux,macos,python,windows,java-web,intellij+all,microsoftoffice
 
 ### Intellij+all ###
@@ -105,8 +108,7 @@ target/
 .nfs*
 
 
-### eclipse ###
-*.prefs
+
 
 ### macOS ###
 *.DS_Store
