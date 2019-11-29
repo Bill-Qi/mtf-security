@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 *
 */
 @Configuration
-public class TempConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
+public class SmsCodeAuthenticationSecurityConfig  extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
 	@Autowired
 	private UserDetailsService userDetailsService;

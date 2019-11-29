@@ -21,36 +21,62 @@ import org.springframework.web.bind.ServletRequestUtils;
  */
 public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
+	public static final String MTF_FORM_MOBILE_KEY = "mobile";
+
+	private String mobilePatameter = MTF_FORM_MOBILE_KEY;
+	private boolean postOnly = true;
+
+	// ~ Constructors
+	// ===================================================================================================
+
 	public SmsCodeAuthenticationFilter() {
+		// 过滤的请求url，登录表单的url
 		super(new AntPathRequestMatcher("/authentication/mobile", "POST"));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.security.web.authentication.
-	 * AbstractAuthenticationProcessingFilter#attemptAuthentication(javax.servlet.
-	 * http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
+	// ~ Methods
+	// ========================================================================================================
+
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException, IOException, ServletException {
-
-		if (!StringUtils.equalsIgnoreCase("post", request.getMethod())) {
-			throw new AuthenticationServiceException("登录请求只支持POST方法");
+			throws AuthenticationException {
+		if (postOnly && !request.getMethod().equals("POST")) {
+			throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
 		}
 
-		String mobile = ServletRequestUtils.getStringParameter(request, "mobile");
+		String mobile = obtainMobile(request);
 
-		if (StringUtils.isBlank(mobile)) {
-			throw new AuthenticationServiceException("手机号不能为空");
+		if (mobile == null) {
+			mobile = "";
 		}
+
+		mobile = mobile.trim();
 
 		SmsCodeAuthenticationToken authRequest = new SmsCodeAuthenticationToken(mobile);
 
-		authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+		// Allow subclasses to set the "details" property
+		setDetails(request, authRequest);
+		// 在这里把SmsCodeAuthenticationToken交给AuthenticationManager
+		return this.getAuthenticationManager().authenticate(authRequest);
+	}
 
-		return getAuthenticationManager().authenticate(authRequest);
+	/**
+	 * 获取手机号
+	 * 
+	 * @Description: TODO
+	 * @param @param request
+	 * @param @return
+	 * @return String
+	 */
+	private String obtainMobile(HttpServletRequest request) {
+		return request.getParameter(mobilePatameter);
+	}
+
+	protected void setDetails(HttpServletRequest request, SmsCodeAuthenticationToken authRequest) {
+		authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+	}
+
+	public void setPostOnly(boolean postOnly) {
+		this.postOnly = postOnly;
 	}
 
 }
