@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -46,8 +47,12 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 		// 读取配置的拦截的urls
 		String[] configUrls = StringUtils
 				.splitByWholeSeparatorPreserveAllTokens(securityProperties.getCode().getImage().getUrl(), ",");
-		for (String configUrl : configUrls) {
-			urls.add(configUrl);
+//		for (String configUrl : configUrls) {
+//			urls.add(configUrl);
+		if(ArrayUtils.isNotEmpty(configUrls)){
+			for (String configUrl : configUrls) {
+				urls.add(configUrl);
+			}
 		}
 		// 登录的请求一定拦截
 		urls.add("/authentication/form");
