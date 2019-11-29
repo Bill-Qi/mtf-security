@@ -43,7 +43,9 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 		ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
 		// 验证码过滤器中使用自己的错误处理
 		validateCodeFilter.setAuthenticationFailureHandler(mtfAuthenticationFailureHandler);
-
+		validateCodeFilter.setSecurityProperties(securityProperties);
+		validateCodeFilter.afterPropertiesSet();
+		
 		http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)//把验证码过滤器加载登录过滤器前边
 				.formLogin().loginPage("/authentication/require").loginProcessingUrl("/authentication/form")
 				.successHandler(mtfAuthenticationSuccessHandler).failureHandler(mtfAuthenticationFailureHandler)
