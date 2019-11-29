@@ -25,37 +25,32 @@ import com.mtf.security.core.properties.SecurityProperties;
 
 /**
  * @author Bill
- * @date 2019年11月28日
+ * @date 2019年11月29日
  *
  */
-public class ValidateCodeFilter extends OncePerRequestFilter implements InitializingBean {
+public class SmsCodeFilter extends OncePerRequestFilter implements InitializingBean {
 
 	private AuthenticationFailureHandler authenticationFailureHandler;
 
 	private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
 
-	// 需要拦截的url集合
 	private Set<String> urls = new HashSet<>();
-	// 读取配置
+
 	private SecurityProperties securityProperties;
-	// spring工具类
-	private AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	@Override
 	public void afterPropertiesSet() throws ServletException {
 		super.afterPropertiesSet();
-		// 读取配置的拦截的urls
 		String[] configUrls = StringUtils
 				.splitByWholeSeparatorPreserveAllTokens(securityProperties.getCode().getImage().getUrl(), ",");
-//		for (String configUrl : configUrls) {
-//			urls.add(configUrl);
-		if(ArrayUtils.isNotEmpty(configUrls)){
+		if (ArrayUtils.isNotEmpty(configUrls)) {
 			for (String configUrl : configUrls) {
 				urls.add(configUrl);
 			}
 		}
-		// 登录的请求一定拦截
-		urls.add("/authentication/form");
+		urls.add("/authentication/mobile");
 	}
 
 	/*
@@ -70,17 +65,15 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-//		if (StringUtils.equals("/authentication/form", request.getRequestURI())
-//				&& StringUtils.equalsIgnoreCase(request.getMethod(), "post")) {
-
 		boolean action = false;
 		for (String url : urls) {
-			if(antPathMatcher.match(url, request.getRequestURI())){
+			if (pathMatcher.match(url, request.getRequestURI())) {
 				action = true;
 			}
 		}
-		
-		if(action) {
+
+		if (action) {
+
 			try {
 				validate(new ServletWebRequest(request));
 			} catch (ValidateCodeException e) {
@@ -96,9 +89,10 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 
 	private void validate(ServletWebRequest request) throws ServletRequestBindingException {
 
-		ImageCode codeInSession = (ImageCode) sessionStrategy.getAttribute(request, ValidateCodeController.SESSION_KEY_FOR_CODE_IMAGE);
+		ValidateCode codeInSession = (ValidateCode) sessionStrategy.getAttribute(request,
+				ValidateCodeController.SESSION_KEY_FOR_CODE_SMS);
 
-		String codeInRequest = ServletRequestUtils.getStringParameter(request.getRequest(), "imageCode");
+		String codeInRequest = ServletRequestUtils.getStringParameter(request.getRequest(), "smsCode");
 
 		if (StringUtils.isBlank(codeInRequest)) {
 			throw new ValidateCodeException("验证码的值不能为空");
@@ -109,7 +103,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 		}
 
 		if (codeInSession.isExpried()) {
-			sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_FOR_CODE_IMAGE);
+			sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_FOR_CODE_SMS);
 			throw new ValidateCodeException("验证码已过期");
 		}
 
@@ -117,7 +111,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 			throw new ValidateCodeException("验证码不匹配");
 		}
 
-		sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_FOR_CODE_IMAGE);
+		sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_FOR_CODE_SMS);
 	}
 
 	public AuthenticationFailureHandler getAuthenticationFailureHandler() {
@@ -135,7 +129,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 	public void setSessionStrategy(SessionStrategy sessionStrategy) {
 		this.sessionStrategy = sessionStrategy;
 	}
-	
+
 	public Set<String> getUrls() {
 		return urls;
 	}

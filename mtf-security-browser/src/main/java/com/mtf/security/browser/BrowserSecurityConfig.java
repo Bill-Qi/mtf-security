@@ -16,7 +16,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import com.mtf.security.core.authentication.sms.TempConfig;
 import com.mtf.security.core.properties.SecurityProperties;
+import com.mtf.security.core.validate.code.SmsCodeFilter;
 import com.mtf.security.core.validate.code.ValidateCodeFilter;
 
 /**
@@ -55,17 +57,20 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 		return tokenRepository;
 	}
 
+	@Autowired
+	private TempConfig tempConfig;
+	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
 		// 验证码过滤器
-		ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
-		// 验证码过滤器中使用自己的错误处理
-		validateCodeFilter.setAuthenticationFailureHandler(mtfAuthenticationFailureHandler);
-		validateCodeFilter.setSecurityProperties(securityProperties);
-		validateCodeFilter.afterPropertiesSet();
-
-		http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)// 把验证码过滤器加载登录过滤器前边
+//		ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
+//		// 验证码过滤器中使用自己的错误处理
+//		validateCodeFilter.setAuthenticationFailureHandler(mtfAuthenticationFailureHandler);
+//		validateCodeFilter.setSecurityProperties(securityProperties);
+//		validateCodeFilter.afterPropertiesSet();
+//		http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)// 把验证码过滤器加载登录过滤器前边
+		http
 				.formLogin().loginPage("/authentication/require").loginProcessingUrl("/authentication/form")
 				.successHandler(mtfAuthenticationSuccessHandler).failureHandler(mtfAuthenticationFailureHandler)
 //		http.httpBasic()
@@ -74,9 +79,28 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 				.userDetailsService(userDetailsService)
 
 				.and().authorizeRequests()
-				.antMatchers("/authentication/require", securityProperties.getBrowser().getLoginPage(), "/code/image")
+				.antMatchers("/authentication/require"
+						, securityProperties.getBrowser().getLoginPage()
+						, "/code/image"
+						, "/code/sms"
+						)
 				.permitAll().anyRequest().authenticated().and().csrf().disable();
 
+		
+		ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
+		validateCodeFilter.setAuthenticationFailureHandler(mtfAuthenticationFailureHandler);
+		validateCodeFilter.setSecurityProperties(securityProperties);
+		validateCodeFilter.afterPropertiesSet();
+		
+		SmsCodeFilter smsCodeFilter = new SmsCodeFilter();
+		smsCodeFilter.setAuthenticationFailureHandler(mtfAuthenticationFailureHandler);
+		smsCodeFilter.setSecurityProperties(securityProperties);
+		smsCodeFilter.afterPropertiesSet();
+		
+		http.apply(tempConfig);
+		
+		http.addFilterBefore(smsCodeFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
 }

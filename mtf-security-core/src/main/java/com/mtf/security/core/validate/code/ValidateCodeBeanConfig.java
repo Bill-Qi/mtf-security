@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.mtf.security.core.properties.SecurityProperties;
+import com.mtf.security.core.validate.code.sms.DefaultSmsCodeSender;
+import com.mtf.security.core.validate.code.sms.SmsCodeSender;
 
 /**
  * 配置验证码生成接口ValidateCodeGenerator的实际实现类的Bean
@@ -46,6 +48,12 @@ public class ValidateCodeBeanConfig {
 		ImageCodeGenerator codeGenerator = new ImageCodeGenerator(); 
 		codeGenerator.setSecurityProperties(securityProperties);
 		return codeGenerator;
+	}
+	
+	@Bean
+	@ConditionalOnMissingBean(SmsCodeSender.class)
+	public SmsCodeSender smsCodeSender() {
+		return new DefaultSmsCodeSender();
 	}
 	
 }
