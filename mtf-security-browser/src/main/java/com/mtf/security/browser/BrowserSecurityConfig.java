@@ -96,7 +96,7 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 					 .authenticated()
 					 .and().csrf().disable()
 			.apply(smsCodeAuthenticationSecurityConfig);//把短信验证码配置应用上
-					 ;
+					 
 
 		
 //		ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
