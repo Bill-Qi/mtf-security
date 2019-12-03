@@ -18,7 +18,7 @@ import com.mtf.security.core.validate.code.ValidateCodeGenerator;
  * @author Bill
  *
  */
-@Component("smsCodeGenerator")
+@Component("smsValidateCodeGenerator")
 public class SmsCodeGenerator implements ValidateCodeGenerator {
 
 	@Autowired

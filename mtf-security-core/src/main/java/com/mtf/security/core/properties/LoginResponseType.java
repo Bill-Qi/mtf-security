@@ -5,7 +5,7 @@ package com.mtf.security.core.properties;
 * @date 2019年11月28日
 *
 */
-public enum LoginType {
+public enum LoginResponseType {
 	
 	REDIRECT,
 		

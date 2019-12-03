@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.ServletWebRequest;
+
+import com.mtf.security.core.properties.SecurityConstants;
+
 /**
  * @author Bill
  * @date 2019年11月28日
@@ -59,20 +62,29 @@ public class ValidateCodeController {
 //		String mobile = ServletRequestUtils.getRequiredStringParameter(request, "mobile");
 //		smsCodeSender.send(mobile, smsCode.getCode());
 //	}
-	@Autowired
-	private Map<String, ValidateCodeProcessor> validateCodeProcessors;
+//	@Autowired
+//	private Map<String, ValidateCodeProcessor> validateCodeProcessors;
 
+	@Autowired
+	private ValidateCodeProcessorHolder validateCodeProcessorHolder;
+	
 	/**
-	 * 创建验证码，根据验证码类型不同，调用不同的 {@link ValidateCodeProcessor}接口实现
+	 * 	创建验证码，根据验证码类型不同，调用不同的 {@link ValidateCodeProcessor}接口实现
 	 * 
 	 * @param request
 	 * @param response
 	 * @param type
 	 * @throws Exception
 	 */
-	@GetMapping("/code/{type}")
+//	@GetMapping("/code/{type}")
+//	public void createCode(HttpServletRequest request, HttpServletResponse response, @PathVariable String type)
+//			throws Exception {
+//		validateCodeProcessors.get(type + "CodeProcessor").create(new ServletWebRequest(request, response));
+//	}
+	
+	@GetMapping(SecurityConstants.DEFAULT_VALIDATE_CODE_URL_PREFIX + "/{type}")
 	public void createCode(HttpServletRequest request, HttpServletResponse response, @PathVariable String type)
 			throws Exception {
-		validateCodeProcessors.get(type + "CodeProcessor").create(new ServletWebRequest(request, response));
+		  validateCodeProcessorHolder.findValidateCodeProcessor(type).create(new ServletWebRequest(request, response));
 	}
 }

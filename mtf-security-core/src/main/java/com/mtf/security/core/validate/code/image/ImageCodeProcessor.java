@@ -13,7 +13,7 @@ import com.mtf.security.core.validate.code.impl.AbstractValidateCodeProcessor;
  * @date 2019年11月29日
  *
  */
-@Component("imageCodeProcessor")
+@Component("imageValidateCodeProcessor")
 public class ImageCodeProcessor extends AbstractValidateCodeProcessor<ImageCode> {
 
 	/**

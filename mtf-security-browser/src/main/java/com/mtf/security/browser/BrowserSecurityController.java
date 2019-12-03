@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.mtf.security.browser.support.SimpleResponse;
+import com.mtf.security.core.properties.SecurityConstants;
 import com.mtf.security.core.properties.SecurityProperties;
 
 /** 
@@ -37,7 +38,7 @@ public class BrowserSecurityController {
     
     @Autowired
     private SecurityProperties securityProperties;
-
+    
 	/**
 	 * 当需要身份认证时，跳转到这里
 	 * 
@@ -46,7 +47,8 @@ public class BrowserSecurityController {
 	 * @return
 	 * @throws IOException 
 	 */
-	@RequestMapping("/authentication/require")
+//	@RequestMapping("/authentication/require")
+	@RequestMapping(SecurityConstants.DEFAULT_UNAUTHENTICATION_URL)
 	@ResponseStatus(code = HttpStatus.UNAUTHORIZED)
 	public SimpleResponse requireAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -59,7 +61,6 @@ public class BrowserSecurityController {
 				redirectStrategy.sendRedirect(request, response, securityProperties.getBrowser().getLoginPage());
 			}
 		}
-
 		return new SimpleResponse("访问的服务需要身份认证，请引导用户到登录页");
 	}
 

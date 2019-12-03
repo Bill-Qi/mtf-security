@@ -14,24 +14,37 @@ public class SmsCodeAuthenticationToken extends AbstractAuthenticationToken {
 
 	private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
 
-	// 没登陆，放手机号，登录成功，放用户信息
+	// ~ Instance fields
+	// ================================================================================================
+
 	private final Object principal;
 
+	// ~ Constructors
+	// ===================================================================================================
+
 	/**
-	 * 没登录放手机号
-	 * <p>
-	 * Description:
-	 * </p>
-	 * 
-	 * @param mobile
+	 * This constructor can be safely used by any code that wishes to create a
+	 * <code>UsernamePasswordAuthenticationToken</code>, as the {@link #isAuthenticated()}
+	 * will return <code>false</code>.
+	 *
 	 */
 	public SmsCodeAuthenticationToken(String mobile) {
 		super(null);
-		this.principal = mobile;// 没登录放手机号
-		setAuthenticated(false);// 没登录
+		this.principal = mobile;
+		setAuthenticated(false);
 	}
 
-	public SmsCodeAuthenticationToken(Object principal, 
+	/**
+	 * This constructor should only be used by <code>AuthenticationManager</code> or
+	 * <code>AuthenticationProvider</code> implementations that are satisfied with
+	 * producing a trusted (i.e. {@link #isAuthenticated()} = <code>true</code>)
+	 * authentication token.
+	 *
+	 * @param principal
+	 * @param credentials
+	 * @param authorities
+	 */
+	public SmsCodeAuthenticationToken(Object principal,
 			Collection<? extends GrantedAuthority> authorities) {
 		super(authorities);
 		this.principal = principal;
@@ -40,6 +53,10 @@ public class SmsCodeAuthenticationToken extends AbstractAuthenticationToken {
 
 	// ~ Methods
 	// ========================================================================================================
+
+	public Object getCredentials() {
+		return null;
+	}
 
 	public Object getPrincipal() {
 		return this.principal;
@@ -57,10 +74,5 @@ public class SmsCodeAuthenticationToken extends AbstractAuthenticationToken {
 	@Override
 	public void eraseCredentials() {
 		super.eraseCredentials();
-	}
-
-	@Override
-	public Object getCredentials() {
-		return null;
 	}
 }

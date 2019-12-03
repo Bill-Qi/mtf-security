@@ -16,10 +16,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import com.mtf.security.core.authentication.AbstractChannelSecurityConfig;
 import com.mtf.security.core.authentication.sms.SmsCodeAuthenticationSecurityConfig;
+import com.mtf.security.core.properties.SecurityConstants;
 import com.mtf.security.core.properties.SecurityProperties;
-import com.mtf.security.core.validate.code.SmsCodeFilter;
 import com.mtf.security.core.validate.code.ValidateCodeFilter;
+import com.mtf.security.core.validate.code.ValidateCodeSecurityConfig;
 
 /**
  * @author Bill
@@ -27,7 +29,8 @@ import com.mtf.security.core.validate.code.ValidateCodeFilter;
  *
  */
 @Configuration
-public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
+//public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
+public class BrowserSecurityConfig extends AbstractChannelSecurityConfig {
 
 	@Autowired
 	private DataSource dataSource;
@@ -54,11 +57,12 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 //		tokenRepository.setCreateTableOnStartup(true);
 		return tokenRepository;
 	}
+	@Autowired
+	private ValidateCodeSecurityConfig validateCodeSecurityConfig;
 
 //	@Autowired
 //	private TempConfig tempConfig;
 	
-	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
 //		 //~~~-------------> 图片验证码过滤器 <------------------
@@ -70,26 +74,33 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 //        validateCodeFilter.afterPropertiesSet();
         
         //~~~-------------> 短信验证码过滤器 <------------------
-        SmsCodeFilter smsCodeFilter = new SmsCodeFilter();
+//        SmsCodeFilter smsCodeFilter = new SmsCodeFilter();
         //验证码过滤器中使用自己的错误处理
-        smsCodeFilter.setAuthenticationFailureHandler(mtfAuthenticationFailureHandler);
-        //配置的验证码过滤url
-        smsCodeFilter.setSecurityProperties(securityProperties);
-        smsCodeFilter.afterPropertiesSet();
+//        smsCodeFilter.setAuthenticationFailureHandler(mtfAuthenticationFailureHandler);
+//        //配置的验证码过滤url
+//        smsCodeFilter.setSecurityProperties(securityProperties);
+//        smsCodeFilter.afterPropertiesSet();
+        
+        applyPasswordAuthenticationConfig(http);
 		
-		
-		
-		http.addFilterBefore(smsCodeFilter, UsernamePasswordAuthenticationFilter.class)// 把验证码过滤器加载登录过滤器前边
-			.formLogin()
-			.loginPage("/authentication/require").loginProcessingUrl("/authentication/mobile")
-			.successHandler(mtfAuthenticationSuccessHandler).failureHandler(mtfAuthenticationFailureHandler)
+		http.apply(validateCodeSecurityConfig)
+				.and()
+			.apply(smsCodeAuthenticationSecurityConfig)
+			
+//			.addFilterBefore(smsCodeFilter, UsernamePasswordAuthenticationFilter.class)// 把验证码过滤器加载登录过滤器前边
+//			.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
+//			.formLogin()
+//			.loginPage("/authentication/require").loginProcessingUrl("/authentication/mobile")
+//			.successHandler(mtfAuthenticationSuccessHandler).failureHandler(mtfAuthenticationFailureHandler)
 			.and().rememberMe().tokenRepository(persistentTokenRepository())
 			.tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
 			.userDetailsService(userDetailsService)
 
 			.and().authorizeRequests()
-			.antMatchers("/authentication/require", "/authentication/mobile"
-					, securityProperties.getBrowser().getLoginPage()
+			.antMatchers(
+					SecurityConstants.DEFAULT_UNAUTHENTICATION_URL,
+					SecurityConstants.DEFAULT_LOGIN_PROCESSING_URL_MOBILE,
+					securityProperties.getBrowser().getLoginPage()
 					, "/code/*"
 					).permitAll()
 					 .anyRequest()

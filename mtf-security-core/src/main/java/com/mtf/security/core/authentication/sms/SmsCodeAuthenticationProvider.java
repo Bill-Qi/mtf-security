@@ -14,37 +14,42 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * @date 2019年11月29日
  *
  */
-public class SmsCodeAuthenticationProvider implements AuthenticationProvider  {
+public class SmsCodeAuthenticationProvider implements AuthenticationProvider {
 
 	private UserDetailsService userDetailsService;
 
-	/**
-	 * 认证
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.springframework.security.authentication.AuthenticationProvider#
+	 * authenticate(org.springframework.security.core.Authentication)
 	 */
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		// 能进到这说明authentication是SmsCodeAuthenticationToken，转一下
+
 		SmsCodeAuthenticationToken authenticationToken = (SmsCodeAuthenticationToken) authentication;
-		// token.getPrincipal()就是手机号 mobile
+
 		UserDetails user = userDetailsService.loadUserByUsername((String) authenticationToken.getPrincipal());
 
-		// 认证没通过
 		if (user == null) {
 			throw new InternalAuthenticationServiceException("无法获取用户信息");
 		}
-		// 认证通过
+
 		SmsCodeAuthenticationToken authenticationResult = new SmsCodeAuthenticationToken(user, user.getAuthorities());
-		// 把认证之前得token里存的用户信息赋值给认证后的token对象
+
 		authenticationResult.setDetails(authenticationToken.getDetails());
+
 		return authenticationResult;
 	}
 
-	/**
-	 * 告诉AuthenticationManager，如果是SmsCodeAuthenticationToken的话用这个类处理
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.springframework.security.authentication.AuthenticationProvider#
+	 * supports(java.lang.Class)
 	 */
 	@Override
 	public boolean supports(Class<?> authentication) {
-		// 判断传进来的authentication是不是SmsCodeAuthenticationToken类型的
 		return SmsCodeAuthenticationToken.class.isAssignableFrom(authentication);
 	}
 

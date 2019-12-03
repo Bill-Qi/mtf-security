@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtf.security.browser.support.SimpleResponse;
-import com.mtf.security.core.properties.LoginType;
+import com.mtf.security.core.properties.LoginResponseType;
 import com.mtf.security.core.properties.SecurityProperties;
 
 /**
@@ -50,7 +50,7 @@ public class MtfAuthenctiationFailureHandler extends SimpleUrlAuthenticationFail
 
 		logger.info("登录失败");
 
-		if (LoginType.JSON.equals(securityProperties.getBrowser().getLoginType())) {
+		if (LoginResponseType.JSON.equals(securityProperties.getBrowser().getLoginType())) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			response.setContentType("application/json;charset=UTF-8");
 			response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponse(exception.getMessage())));
