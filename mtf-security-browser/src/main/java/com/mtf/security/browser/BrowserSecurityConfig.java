@@ -6,21 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-
+import org.springframework.social.security.SpringSocialConfigurer;
 import com.mtf.security.core.authentication.AbstractChannelSecurityConfig;
 import com.mtf.security.core.authentication.sms.SmsCodeAuthenticationSecurityConfig;
 import com.mtf.security.core.properties.SecurityConstants;
 import com.mtf.security.core.properties.SecurityProperties;
-import com.mtf.security.core.validate.code.ValidateCodeFilter;
 import com.mtf.security.core.validate.code.ValidateCodeSecurityConfig;
 
 /**
@@ -50,6 +45,9 @@ public class BrowserSecurityConfig extends AbstractChannelSecurityConfig {
 	@Autowired
 	private AuthenticationFailureHandler mtfAuthenticationFailureHandler;
 
+	//@Autowired
+	private SpringSocialConfigurer mtfSocialSecurityConfig = new SpringSocialConfigurer();
+	
 	@Bean
 	public PersistentTokenRepository persistentTokenRepository() {
 		JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
@@ -86,7 +84,8 @@ public class BrowserSecurityConfig extends AbstractChannelSecurityConfig {
 		http.apply(validateCodeSecurityConfig)
 				.and()
 			.apply(smsCodeAuthenticationSecurityConfig)
-			
+			.and()
+			.apply(mtfSocialSecurityConfig)
 //			.addFilterBefore(smsCodeFilter, UsernamePasswordAuthenticationFilter.class)// 把验证码过滤器加载登录过滤器前边
 //			.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
 //			.formLogin()
