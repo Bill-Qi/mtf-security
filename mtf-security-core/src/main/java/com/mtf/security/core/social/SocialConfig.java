@@ -3,6 +3,7 @@ package com.mtf.security.core.social;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.social.config.annotation.EnableSocial;
@@ -10,6 +11,9 @@ import org.springframework.social.config.annotation.SocialConfigurerAdapter;
 import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.social.connect.UsersConnectionRepository;
 import org.springframework.social.connect.jdbc.JdbcUsersConnectionRepository;
+import org.springframework.social.security.SpringSocialConfigurer;
+
+import com.mtf.security.core.properties.SecurityProperties;
 
 /** 
 * @author Bill
@@ -22,6 +26,9 @@ public class SocialConfig extends SocialConfigurerAdapter {
 	
 	@Autowired
     private DataSource dataSource;
+	
+	@Autowired
+	private SecurityProperties securityProperties;
     
     /**
      * 	配置JdbcUsersConnectionRepository
@@ -44,5 +51,17 @@ public class SocialConfig extends SocialConfigurerAdapter {
         repository.setTablePrefix("mtf_");
         return repository;
     }
+    
+//    @Bean
+//	public SpringSocialConfigurer mtfSocialSecurityConfig() {
+//		return new SpringSocialConfigurer();
+//	}
+    
+    @Bean
+	public SpringSocialConfigurer mtfSocialSecurityConfig() {
+		String filterProcessesUrl = securityProperties.getSocial().getFilterProcessesUrl();
+		MtfSpringSocialConfigurer configurer = new MtfSpringSocialConfigurer(filterProcessesUrl);
+		return configurer;
+	}
 }
 

@@ -49,6 +49,13 @@ public class UserController {
 
 		return user.setId("1");
 	}
+	
+	@PostMapping("/regist")
+	public void regist(User user) {
+		
+		//注册用户
+		
+	}
 
 	@PutMapping("/{id:\\d+}")
 	public User update(@Valid @RequestBody User user, BindingResult errors) {

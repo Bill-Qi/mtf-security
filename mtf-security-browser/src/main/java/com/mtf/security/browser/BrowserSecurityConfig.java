@@ -45,8 +45,9 @@ public class BrowserSecurityConfig extends AbstractChannelSecurityConfig {
 	@Autowired
 	private AuthenticationFailureHandler mtfAuthenticationFailureHandler;
 
-	//@Autowired
-	private SpringSocialConfigurer mtfSocialSecurityConfig = new SpringSocialConfigurer();
+	@Autowired
+	private SpringSocialConfigurer mtfSocialSecurityConfig;
+	
 	
 	@Bean
 	public PersistentTokenRepository persistentTokenRepository() {
@@ -99,8 +100,9 @@ public class BrowserSecurityConfig extends AbstractChannelSecurityConfig {
 			.antMatchers(
 					SecurityConstants.DEFAULT_UNAUTHENTICATION_URL,
 					SecurityConstants.DEFAULT_LOGIN_PROCESSING_URL_MOBILE,
-					securityProperties.getBrowser().getLoginPage()
-					, "/code/*"
+					securityProperties.getBrowser().getLoginPage(),
+					SecurityConstants.DEFAULT_VALIDATE_CODE_URL_PREFIX+"/*",
+					securityProperties.getBrowser().getSignUpUrl()
 					).permitAll()
 					 .anyRequest()
 					 .authenticated()
