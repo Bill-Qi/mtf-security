@@ -24,8 +24,8 @@ import com.mtf.security.core.properties.SecurityProperties;
  * @date 2019年11月28日
  *
  */
-@Component("mtfAuthenctiationFailureHandler")
-public class MtfAuthenctiationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+@Component("mtfAuthenticationFailureHandler")
+public class MtfAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 

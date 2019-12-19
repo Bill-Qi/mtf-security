@@ -9,8 +9,10 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.social.config.annotation.EnableSocial;
 import org.springframework.social.config.annotation.SocialConfigurerAdapter;
 import org.springframework.social.connect.ConnectionFactoryLocator;
+import org.springframework.social.connect.ConnectionSignUp;
 import org.springframework.social.connect.UsersConnectionRepository;
 import org.springframework.social.connect.jdbc.JdbcUsersConnectionRepository;
+import org.springframework.social.connect.web.ProviderSignInUtils;
 import org.springframework.social.security.SpringSocialConfigurer;
 
 import com.mtf.security.core.properties.SecurityProperties;
@@ -30,6 +32,9 @@ public class SocialConfig extends SocialConfigurerAdapter {
 	@Autowired
 	private SecurityProperties securityProperties;
     
+	@Autowired(required = false)
+	private ConnectionSignUp connectionSignUp;
+	
     /**
      * 	配置JdbcUsersConnectionRepository
      */
@@ -49,6 +54,11 @@ public class SocialConfig extends SocialConfigurerAdapter {
     			, connectionFactoryLocator
     			, Encryptors.noOpText());
         repository.setTablePrefix("mtf_");
+        
+        if(connectionSignUp != null) {
+			repository.setConnectionSignUp(connectionSignUp);
+		}
+        
         return repository;
     }
     
@@ -61,7 +71,15 @@ public class SocialConfig extends SocialConfigurerAdapter {
 	public SpringSocialConfigurer mtfSocialSecurityConfig() {
 		String filterProcessesUrl = securityProperties.getSocial().getFilterProcessesUrl();
 		MtfSpringSocialConfigurer configurer = new MtfSpringSocialConfigurer(filterProcessesUrl);
+		configurer.signupUrl(securityProperties.getBrowser().getSignUpUrl());
 		return configurer;
+	}
+    
+    @Bean
+	public ProviderSignInUtils providerSignInUtils(ConnectionFactoryLocator connectionFactoryLocator) {
+		return new ProviderSignInUtils(connectionFactoryLocator,
+				getUsersConnectionRepository(connectionFactoryLocator)) {
+		};
 	}
 }
 
