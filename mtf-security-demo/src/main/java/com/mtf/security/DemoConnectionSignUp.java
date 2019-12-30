@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 * @date 2019年12月4日
 *
 */
-@Component
+//@Component
 public class DemoConnectionSignUp implements ConnectionSignUp {
 
 	/* (non-Javadoc)

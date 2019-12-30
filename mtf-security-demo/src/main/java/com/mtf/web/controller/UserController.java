@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.ServletWebRequest;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.common.reflect.Reflection;
 import com.mtf.dto.User;
 import com.mtf.dto.UserQueryCondition;
 
@@ -50,7 +51,6 @@ public class UserController {
 	@PostMapping
 	public User create(@Valid @RequestBody User user) {
 		logger.info(ReflectionToStringBuilder.toString(user, ToStringStyle.MULTI_LINE_STYLE));
-
 //        if (errors.hasErrors()) {
 //            errors.getAllErrors().forEach(e -> logger.error(e.getDefaultMessage()));
 //        }
